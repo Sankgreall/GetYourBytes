@@ -1,6 +1,14 @@
 import os
 import time
+import aiohttp
+import aiohttp_socks
+import socks
+import socket
+import json
 import urllib3
+from urllib3.contrib.socks import SOCKSProxyManager
+
+
 
 def read_urls_from_file(file_path):
     with open(file_path, 'r') as f:
@@ -54,16 +62,26 @@ def generate_save_file_path(url, directory):
 
   return save_path
 
+def create_connection_fixed_dns_leak(address, timeout=None, source_address=None):
+    sock = socks.socksocket()
+    sock.connect(address)
+    return sock
+
+
 async def download_files():
     pass
 
-async def download_file(url, output_dir, retry_delay):
+async def download_file(url, output_dir, retry_delay, use_tor=False):
 
     # Create the save_path
     save_path = generate_save_file_path(url, output_dir)
 
-    # Create an HTTP client
-    http = urllib3.PoolManager()
+    if use_tor:
+        http = SOCKSProxyManager('socks5h://localhost:9050/')
+    
+    else:
+        # Create an HTTP client
+        http = urllib3.PoolManager()
 
     # Set placeholder header variable
     headers = {}
