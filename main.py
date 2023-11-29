@@ -37,6 +37,7 @@ if args.url and not re.match(r'^https?://(?:[a-zA-Z0-9-_]+\.)+[a-zA-Z0-9-_]+(?::
     exit(1)
 
 # Validate the output directory and create if non-existant
+print(args.output_dir)
 if args.output_dir:
     # If output directory exists as a directory
     if not os.path.isdir(args.output_dir):
