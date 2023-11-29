@@ -90,7 +90,7 @@ async def download_file(url, output_dir, retry_delay, use_tor=False):
     response_headers = http.request('HEAD', url)
 
     # Get the file size from the response headers
-    download_size = int(response_headers.headers['Content-Length'])
+    download_size = int(response_headers.headers.get('Content-Length', 0))
 
     # Check if the server supports partial content retrieval
     if 'Accept-Ranges' in response_headers.headers and response_headers.headers['Accept-Ranges'] == 'bytes':
@@ -101,8 +101,12 @@ async def download_file(url, output_dir, retry_delay, use_tor=False):
         print(f"[WARN] -- Server does not support partial content retrieval.")
         supports_partial_content = False
 
-    # If the server does not support partial content retrieval or the file does not exist, download the entire file
-    if not supports_partial_content or not os.path.exists(save_path):
+    # If 
+    # - the server does not support partial content retrieval 
+    # - file does not exist
+    # - The server reported size is zero (bad header?)
+    # THEN download the entire file
+    if not supports_partial_content or not os.path.exists(save_path) or download_size == 0:
         # We must overwrite any existing file
         append_write = "wb"
 
