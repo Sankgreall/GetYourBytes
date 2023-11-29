@@ -4,7 +4,7 @@ import json
 from urllib.parse import urlparse
 import urllib3
 from urllib3.contrib.socks import SOCKSProxyManager
-from tenacity import before_sleep_print, retry, stop_after_delay, wait_exponential, wait_random
+from tenacity import retry, stop_after_delay, wait_exponential
 
 # How long should we keep polling a dead connection?
 WAIT_TIME_IN_SECONDS = 3 * 24 * 3600 # 3 days
@@ -76,7 +76,7 @@ def generate_save_file_path(url, base_directory):
 @retry(
     stop=stop_after_delay(WAIT_TIME_IN_SECONDS), # Stop after a defined number of days
     wait=wait_exponential(multiplier=2, max=MAX_RETRY_DELAY_IN_SECONDS), # Exponential backoff 
-    before_sleep=before_sleep_print
+    # before_sleep=before_sleep_print
 )
 async def download_file(url, output_dir, retry_delay, use_tor=False):
 
