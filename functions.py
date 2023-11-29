@@ -4,11 +4,19 @@ import json
 from urllib.parse import urlparse
 import urllib3
 from urllib3.contrib.socks import SOCKSProxyManager
+from tenacity import before_sleep_print, retry, stop_after_delay, wait_exponential, wait_random
+
+# How long should we keep polling a dead connection?
+WAIT_TIME_IN_SECONDS = 3 * 24 * 3600 # 3 days
+MAX_RETRY_DELAY_IN_SECONDS = 60 * 30 # 30 minutes
 
 def read_urls_from_file(file_path):
     with open(file_path, 'r') as f:
         for line in f:
             yield line.strip()
+
+def log_retry(retry_state):
+    print(f"Retry attempt {retry_state.attempt_number}: Waiting {retry_state.next_action.sleep} seconds before next attempt.")
 
 def friendly_time(total_time):
     # Calculate the total download time in minutes, seconds, and milliseconds
@@ -48,22 +56,28 @@ def bytes_to_friendly_value(bytes_value):
     else:
         return f"{bytes_value/1024**3:.2f} GB"
 
-def generate_save_file_path(url, directory):
+def generate_save_file_path(url, base_directory):
     # Parse the URL to extract the path
     parsed_url = urlparse(url)
     path = parsed_url.path
 
-    # Replace slashes with underscores and remove leading underscore
-    file_name = path.replace('/', '_').lstrip('_')
+    # Remove the leading slash to prevent absolute path creation
+    if path.startswith('/'):
+        path = path[1:]
 
-    # Generate the save path
-    save_path = os.path.join(directory, file_name)
+    # Generate the save path with folder structure
+    save_path = os.path.join(base_directory, path)
+
+    # Create directories if they don't exist
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     return save_path
 
-async def download_files():
-    pass
-
+@retry(
+    stop=stop_after_delay(WAIT_TIME_IN_SECONDS), # Stop after a defined number of days
+    wait=wait_exponential(multiplier=2, max=MAX_RETRY_DELAY_IN_SECONDS), # Exponential backoff 
+    before_sleep=before_sleep_print
+)
 async def download_file(url, output_dir, retry_delay, use_tor=False):
 
     # Create the save_path

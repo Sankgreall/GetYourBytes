@@ -4,7 +4,7 @@ import re
 import os
 import time
 
-from functions import download_file, read_urls_from_file, friendly_time, friendly_bandwidth
+from functions import download_file, read_urls_from_file, friendly_time
 
 ########################################
 ####    INPUT ARGUMENTS
