@@ -101,7 +101,7 @@ async def download_file(url, output_dir, retry_delay, use_tor=False):
         print(f"[WARN] -- Server does not support partial content retrieval.")
         supports_partial_content = False
 
-    # If 
+    # IF
     # - the server does not support partial content retrieval 
     # - file does not exist
     # - The server reported size is zero (bad header?)
@@ -172,8 +172,11 @@ async def download_file(url, output_dir, retry_delay, use_tor=False):
             elapsed_time = time.time() - download_start_time
             current_bandwidth = total_data / elapsed_time
 
-            download_progress = (total_data / download_size) * 100
-            print(f'\r[INFO] -- Download progress: {download_progress:.2f}% -- Bandwidth: {friendly_bandwidth(current_bandwidth)}', end='')
+            if download_size > 0:
+                download_progress = (total_data / download_size) * 100
+                print(f'\r[INFO] -- Download progress: {download_progress:.2f}% -- Bandwidth: {friendly_bandwidth(current_bandwidth)}', end='')
+            else:
+                print(f'\r[INFO] -- Unable to report on bandwidth. Server is reporting a file size of 0 bytes, which is wrong.', end='')
     
 
     # Print a message to indicate that the download is complete
