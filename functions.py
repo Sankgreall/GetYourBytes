@@ -1,14 +1,9 @@
 import os
 import time
-import aiohttp
-import aiohttp_socks
-import socks
-import socket
 import json
+from urllib.parse import urlparse
 import urllib3
 from urllib3.contrib.socks import SOCKSProxyManager
-
-
 
 def read_urls_from_file(file_path):
     with open(file_path, 'r') as f:
@@ -54,19 +49,17 @@ def bytes_to_friendly_value(bytes_value):
         return f"{bytes_value/1024**3:.2f} GB"
 
 def generate_save_file_path(url, directory):
-  # Extract the file name from the URL
-  file_name = url.split("/")[-1]
+    # Parse the URL to extract the path
+    parsed_url = urlparse(url)
+    path = parsed_url.path
 
-  # Generate the save path
-  save_path = os.path.join(directory, file_name)
+    # Replace slashes with underscores and remove leading underscore
+    file_name = path.replace('/', '_').lstrip('_')
 
-  return save_path
+    # Generate the save path
+    save_path = os.path.join(directory, file_name)
 
-def create_connection_fixed_dns_leak(address, timeout=None, source_address=None):
-    sock = socks.socksocket()
-    sock.connect(address)
-    return sock
-
+    return save_path
 
 async def download_files():
     pass
@@ -75,6 +68,9 @@ async def download_file(url, output_dir, retry_delay, use_tor=False):
 
     # Create the save_path
     save_path = generate_save_file_path(url, output_dir)
+
+    # Ensure that the directory structure exists
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     if use_tor:
         http = SOCKSProxyManager('socks5h://localhost:9050/')
@@ -112,7 +108,6 @@ async def download_file(url, output_dir, retry_delay, use_tor=False):
 
         # Print the total file size
         print(f"[INFO] -- Downloading {url} to {save_path}")
-
 
     # If server supports partial content retrival and the file exists, resume download
     elif supports_partial_content and os.path.exists(save_path):
