@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('-u', '--url', type=str, help='URL of the file to download')
 group.add_argument('-f', '--file', type=str, help='Path to the file containing URLs to download')
-group.add_argument('--flat', action='store_true', help='Store downloads in a flat directory structure')
+group.add_argument('-s', '--store-flat', action='store_true', help='Store downloads in a flat directory structure')
 parser.add_argument('--tor', action='store_true', help='Route through Tor')
 
 
