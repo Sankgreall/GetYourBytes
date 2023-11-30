@@ -56,7 +56,8 @@ def bytes_to_friendly_value(bytes_value):
     else:
         return f"{bytes_value/1024**3:.2f} GB"
 
-def generate_save_file_path(url, base_directory):
+def generate_save_file_path(url, base_directory, header_filename=None):
+    
     # Parse the URL to extract the path
     parsed_url = urlparse(url)
     path = parsed_url.path
@@ -64,6 +65,13 @@ def generate_save_file_path(url, base_directory):
     # Remove the leading slash to prevent absolute path creation
     if path.startswith('/'):
         path = path[1:]
+
+    # Extract directory path and replace filename if header_filename is provided
+    if header_filename:
+        # Remove the last component (original filename) from the path
+        directory_path = os.path.dirname(path)
+        # Combine the directory path with the new filename
+        path = os.path.join(directory_path, header_filename)
 
     # Generate the save path with folder structure
     save_path = os.path.join(base_directory, path)
@@ -80,12 +88,6 @@ def generate_save_file_path(url, base_directory):
 )
 async def download_file(url, output_dir, retry_delay, use_tor=False):
 
-    # Create the save_path
-    save_path = generate_save_file_path(url, output_dir)
-
-    # Ensure that the directory structure exists
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-
     if use_tor:
         http = SOCKSProxyManager('socks5h://localhost:9050/')
     
@@ -98,6 +100,17 @@ async def download_file(url, output_dir, retry_delay, use_tor=False):
 
     # Use the client to send a request to the server to obtain the response headers
     response_headers = http.request('HEAD', url)
+
+    # If there a filename in the returned headers
+    header_filename = None
+    if 'Content-Disposition' in response_headers.headers:
+        content_disposition = response_headers.headers['Content-Disposition']
+        filename_index = content_disposition.find('filename=')
+        if filename_index != -1:
+            header_filename = content_disposition[filename_index+len('filename='):].strip('"')
+
+    # Create the save_path
+    save_path = generate_save_file_path(url, output_dir, header_filename=header_filename)
 
     # Get the file size from the response headers
     download_size = int(response_headers.headers.get('Content-Length', 0))
