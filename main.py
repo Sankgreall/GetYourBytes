@@ -17,11 +17,10 @@ parser = argparse.ArgumentParser()
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('-u', '--url', type=str, help='URL of the file to download')
 group.add_argument('-f', '--file', type=str, help='Path to the file containing URLs to download')
-group.add_argument('-s', '--store-flat', action='store_true', help='Store downloads in a flat directory structure')
-parser.add_argument('--tor', action='store_true', help='Route through Tor')
-
 
 # Add remaining arguments
+parser.add_argument('-s', '--store-flat', action='store_true', help='Store downloads in a flat directory structure')
+parser.add_argument('--tor', action='store_true', help='Route through Tor')
 parser.add_argument('-o', '--output_dir', type=str, help='Local directory where the file should be saved', default=os.path.join(os.getcwd(), 'downloaded'))
 parser.add_argument('-r', '--retry_delay', type=int, help='Number of seconds to wait before retrying a failed download attempt', default=5)
 
