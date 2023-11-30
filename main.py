@@ -17,6 +17,7 @@ parser = argparse.ArgumentParser()
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('-u', '--url', type=str, help='URL of the file to download')
 group.add_argument('-f', '--file', type=str, help='Path to the file containing URLs to download')
+group.add_argument('--flat', action='store_true', help='Store downloads in a flat directory structure')
 parser.add_argument('--tor', action='store_true', help='Route through Tor')
 
 
@@ -69,10 +70,10 @@ if args.file:
             continue
 
         # Download file
-        asyncio.run(download_file(url, args.output_dir, args.retry_delay, args.tor))
+        asyncio.run(download_file(url, args.output_dir, args.retry_delay, args.tor, args.flat))
 else:
     # Download the specified URL
-    asyncio.run(download_file(args.url, args.output_dir, args.retry_delay, args.tor))
+    asyncio.run(download_file(args.url, args.output_dir, args.retry_delay, args.tor, args.flat))
 
 # Track the end time
 download_end_time = time.time()

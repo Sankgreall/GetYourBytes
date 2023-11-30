@@ -56,8 +56,7 @@ def bytes_to_friendly_value(bytes_value):
     else:
         return f"{bytes_value/1024**3:.2f} GB"
 
-def generate_save_file_path(url, base_directory, header_filename=None):
-    
+def generate_save_file_path(url, base_directory, header_filename=None, flat=False):
     # Parse the URL to extract the path
     parsed_url = urlparse(url)
     path = parsed_url.path
@@ -66,15 +65,20 @@ def generate_save_file_path(url, base_directory, header_filename=None):
     if path.startswith('/'):
         path = path[1:]
 
-    # Extract directory path and replace filename if header_filename is provided
-    if header_filename:
-        # Remove the last component (original filename) from the path
-        directory_path = os.path.dirname(path)
-        # Combine the directory path with the new filename
-        path = os.path.join(directory_path, header_filename)
+    # Check if flat is True and header_filename is not None
+    if flat and header_filename:
+        # Set the path to only the header_filename within the base_directory
+        save_path = os.path.join(base_directory, header_filename)
+    else:
+        # Extract directory path and replace filename if header_filename is provided
+        if header_filename:
+            # Remove the last component (original filename) from the path
+            directory_path = os.path.dirname(path)
+            # Combine the directory path with the new filename
+            path = os.path.join(directory_path, header_filename)
 
-    # Generate the save path with folder structure
-    save_path = os.path.join(base_directory, path)
+        # Generate the save path with folder structure
+        save_path = os.path.join(base_directory, path)
 
     # Create directories if they don't exist
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
@@ -86,7 +90,7 @@ def generate_save_file_path(url, base_directory, header_filename=None):
     wait=wait_exponential(multiplier=2, max=MAX_RETRY_DELAY_IN_SECONDS), # Exponential backoff 
     # before_sleep=before_sleep_print
 )
-async def download_file(url, output_dir, retry_delay, use_tor=False):
+async def download_file(url, output_dir, retry_delay, use_tor=False, flat=False):
 
     if use_tor:
         http = SOCKSProxyManager('socks5h://localhost:9050/')
@@ -110,7 +114,7 @@ async def download_file(url, output_dir, retry_delay, use_tor=False):
             header_filename = content_disposition[filename_index+len('filename='):].strip('"')
 
     # Create the save_path
-    save_path = generate_save_file_path(url, output_dir, header_filename=header_filename)
+    save_path = generate_save_file_path(url, output_dir, header_filename=header_filename, flat=flat)
 
     # Get the file size from the response headers
     download_size = int(response_headers.headers.get('Content-Length', 0))
