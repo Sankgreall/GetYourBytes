@@ -32,7 +32,7 @@ args = parser.parse_args()
 ########################################
 
 # Validate the URL
-if args.url and not re.match(r'^https?://(?:[a-zA-Z0-9-_]+\.)+[a-zA-Z0-9-_]+(?::\d+)?(?:/[a-zA-Z0-9-_./?#%]*)?$', args.url):
+if args.url and not re.match(r'^https?://(?:[a-zA-Z0-9-_]+\.)+[a-zA-Z0-9-_]+(?::\d+)?(?:/[a-zA-Z0-9-_:./?#%]*)?$', args.url):
     print('[ERROR] -- Please provide a valid URL in the format https://example.com')
     exit(1)
 
@@ -64,7 +64,7 @@ if args.file:
     for line_number, url in enumerate(read_urls_from_file(args.file), start=1):
 
         # Validate the url
-        if not re.match(r'^https?://(?:[a-zA-Z0-9-_]+\.)+[a-zA-Z0-9-_]+(?::\d+)?(?:/[a-zA-Z0-9-_./?#%]*)?$', url):
+        if not re.match(r'^https?://(?:[a-zA-Z0-9-_]+\.)+[a-zA-Z0-9-_]+(?::\d+)?(?:/[a-zA-Z0-9-_:./?#%]*)?$', url):
             print(f"[WARN] -- Invalid URL detected on line {line_number}, skipping...")
             continue
 
