@@ -70,10 +70,10 @@ if args.file:
             continue
 
         # Download file
-        asyncio.run(download_file(url, args.output_dir, args.retry_delay, args.tor, args.flat))
+        asyncio.run(download_file(url, args.output_dir, args.retry_delay, args.tor, args.store_flat))
 else:
     # Download the specified URL
-    asyncio.run(download_file(args.url, args.output_dir, args.retry_delay, args.tor, args.flat))
+    asyncio.run(download_file(args.url, args.output_dir, args.retry_delay, args.tor, args.store_flat))
 
 # Track the end time
 download_end_time = time.time()
